@@ -4,7 +4,7 @@ const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const telegramToken = '7209539640:AAHiscqStO8mpy8aurPL6bunDFAtFfIy258'; // Reemplaza con el token de tu bot
+const telegramToken = '7209539640:AAHiscqStO8mpy8aurPL6bunDFAtFfIy258';
 const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}`;
 
 let users = {};
@@ -15,6 +15,8 @@ app.use(express.static('public'));
 
 // Ruta para manejar el webhook de Telegram
 app.post(`/webhook/${telegramToken}`, (req, res) => {
+    console.log('Webhook request received:', req.body); // Registro de solicitud recibida
+
     const message = req.body.message;
     const chatId = message.chat.id;
     const username = message.from.username || message.from.first_name;
@@ -23,17 +25,16 @@ app.post(`/webhook/${telegramToken}`, (req, res) => {
         users[chatId] = { username: username, score: 0 };
     }
 
-    // Aquí puedes manejar la lógica según el mensaje recibido
-    // Por ejemplo, responder al mensaje recibido
+    // Manejo del mensaje recibido
     axios.post(`${telegramApiUrl}/sendMessage`, {
         chat_id: chatId,
         text: `Hello, ${username}! Your current score is ${users[chatId].score}.`
     })
     .then(response => {
-        console.log('Mensaje enviado:', response.data);
+        console.log('Mensaje enviado:', response.data); // Registro de mensaje enviado
     })
     .catch(error => {
-        console.error('Error al enviar mensaje:', error);
+        console.error('Error al enviar mensaje:', error); // Registro de error al enviar mensaje
     });
 
     res.sendStatus(200); // Responder al servidor de Telegram
