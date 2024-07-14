@@ -4,7 +4,7 @@ const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const telegramToken = '7209539640:AAHiscqStO8mpy8aurPL6bunDFAtFfIy258';
+const telegramToken = '7209539640:AAHiscqStO8mpy8aurPL6bunDFAtFfIy258'; // Reemplaza con el token de tu bot
 const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}`;
 
 let users = {};
@@ -13,7 +13,7 @@ let users = {};
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Telegram Webhook
+// Ruta para manejar el webhook de Telegram
 app.post(`/webhook/${telegramToken}`, (req, res) => {
     const message = req.body.message;
     const chatId = message.chat.id;
@@ -23,22 +23,29 @@ app.post(`/webhook/${telegramToken}`, (req, res) => {
         users[chatId] = { username: username, score: 0 };
     }
 
-    // Respond to user
+    // Aquí puedes manejar la lógica según el mensaje recibido
+    // Por ejemplo, responder al mensaje recibido
     axios.post(`${telegramApiUrl}/sendMessage`, {
         chat_id: chatId,
         text: `Hello, ${username}! Your current score is ${users[chatId].score}.`
+    })
+    .then(response => {
+        console.log('Mensaje enviado:', response.data);
+    })
+    .catch(error => {
+        console.error('Error al enviar mensaje:', error);
     });
 
-    res.sendStatus(200);
+    res.sendStatus(200); // Responder al servidor de Telegram
 });
 
-// Endpoint to get ranking
+// Endpoint para obtener el ranking
 app.get('/ranking', (req, res) => {
     const ranking = Object.values(users).sort((a, b) => b.score - a.score);
     res.json(ranking);
 });
 
-// Endpoint to update score
+// Endpoint para actualizar el puntaje
 app.post('/update-score', (req, res) => {
     const { chatId, score } = req.body;
     if (users[chatId]) {
@@ -49,7 +56,7 @@ app.post('/update-score', (req, res) => {
     }
 });
 
-// Start server
+// Iniciar el servidor
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Servidor corriendo en el puerto ${port}`);
 });
